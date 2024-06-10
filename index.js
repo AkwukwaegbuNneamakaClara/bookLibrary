@@ -1,95 +1,97 @@
-require('dotenv').config();
-const express = require('express');
-const mysql = require('mysql2');
-const bodyParser = require('body-parser');
+import 'dotenv/config'; // Automatically loads environment variables from a .env file
+import express from 'express';
+import mysql from 'mysql2/promise'; // Using promise-based API
+import bodyParser from 'body-parser';
 
 const app = express();
 app.use(bodyParser.json());
 
-const db = mysql.createConnection({
+const db = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'root',
     database: process.env.DB_NAME || 'booklibrary'
 });
 
-db.connect(err => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-        return;
-    }
+try {
+    await db.connect();
     console.log('Connected to the MySQL database.');
-});
+} catch (err) {
+    console.error('Error connecting to the database:', err);
+    process.exit(1);
+}
 
-app.post('/books', (req, res) => {
+app.post('/books', async (req, res) => {
     const { title, author, published_date, isbn } = req.body;
     const query = 'INSERT INTO books (title, author, published_date, isbn) VALUES (?, ?, ?, ?)';
-    db.query(query, [title, author, published_date, isbn], (err, result) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
+    try {
+        const [result] = await db.execute(query, [title, author, published_date, isbn]);
         res.status(201).send(`Book added with ID: ${result.insertId}`);
-    });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 // Read all books
-app.get('/books', (req, res) => {
-    db.query('SELECT * FROM books', (err, results) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
+app.get('/books', async (req, res) => {
+    try {
+        const [results] = await db.execute('SELECT * FROM books');
         res.status(200).json(results);
-    });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 // Read a specific book
-app.get('/books/:id', (req, res) => {
+app.get('/books/:id', async (req, res) => {
     const { id } = req.params;
-    db.query('SELECT * FROM books WHERE id = ?', [id], (err, results) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
+    try {
+        const [results] = await db.execute('SELECT * FROM books WHERE id = ?', [id]);
         if (results.length === 0) {
-            return res.status(404).send('Book not found');
+            res.status(404).send('Book not found');
+        } else {
+            res.status(200).json(results[0]);
         }
-        res.status(200).json(results[0]);
-    });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 // Update a book
-app.put('/books/:id', (req, res) => {
+app.put('/books/:id', async (req, res) => {
     const { id } = req.params;
     const { title, author, published_date, isbn } = req.body;
     const query = 'UPDATE books SET title = ?, author = ?, published_date = ?, isbn = ? WHERE id = ?';
-    db.query(query, [title, author, published_date, isbn, id], (err, result) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
+    try {
+        const [result] = await db.execute(query, [title, author, published_date, isbn, id]);
         if (result.affectedRows === 0) {
-            return res.status(404).send('Book not found');
+            res.status(404).send('Book not found');
+        } else {
+            res.status(200).send('Book updated successfully');
         }
-        res.status(200).send('Book updated successfully');
-    });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 // Delete a book
-app.delete('/books/:id', (req, res) => {
+app.delete('/books/:id', async (req, res) => {
     const { id } = req.params;
-    db.query('DELETE FROM books WHERE id = ?', [id], (err, result) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
+    try {
+        const [result] = await db.execute('DELETE FROM books WHERE id = ?', [id]);
         if (result.affectedRows === 0) {
-            return res.status(404).send('Book not found');
+            res.status(404).send('Book not found');
+        } else {
+            res.status(200).send('Book deleted successfully');
         }
-        res.status(200).send('Book deleted successfully');
-    });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
-if (require.main === module) {
-const PORT = 3333;
+
+const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-} else {
-    module.exports = app;
-}
+
+export default app;
