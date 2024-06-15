@@ -10,7 +10,8 @@ const db = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'root',
-    database: process.env.DB_NAME || 'booklibrary'
+    //database: process.env.DB_NAME || 'booklibrary_test'
+    database: process.env.NODE_ENV === 'test' ? 'booklibrary_test' : 'booklibrary'
 });
 
 try {
@@ -89,7 +90,7 @@ app.delete('/books/:id', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
