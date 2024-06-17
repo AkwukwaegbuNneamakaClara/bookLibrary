@@ -52,4 +52,4 @@ jobs:
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-      run: npm test
+      run: npx mocha "test/**/*.mjs"
