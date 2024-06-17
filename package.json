@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "./node_modules/.bin/mocha 'test/**/*.mjs'"
+    "test": "npx mocha \"test/**/*.mjs\""
   },
   "keywords": [],
   "author": "",
