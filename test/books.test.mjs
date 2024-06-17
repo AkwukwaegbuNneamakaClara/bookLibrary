@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import mysql from 'mysql2/promise';
-import app from '../index.js'; // adjust the path as necessary
+import app from '../index.js';
 
 let db;
 
