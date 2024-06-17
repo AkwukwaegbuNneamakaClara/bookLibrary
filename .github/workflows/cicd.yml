@@ -37,6 +37,9 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+       
+    - name: Ensure mocha permissions
+      run: chmod +x ./node_modules/.bin/mocha
 
     - name: Wait for MySQL to be ready
       run: |
@@ -52,4 +55,4 @@ jobs:
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-      run: npx mocha "test/**/*.mjs"
+      run: npm test
