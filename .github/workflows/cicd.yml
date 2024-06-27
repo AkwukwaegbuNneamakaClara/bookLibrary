@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js CICD  
 
 on:
   push:
@@ -12,6 +12,20 @@ jobs:
     strategy:
       matrix:
         node-version: [18.15.0]  # Choose your Node.js version here
+      
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: booklibrary_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
     - name: Checkout code
@@ -28,33 +42,31 @@ jobs:
     - name: Ensure mocha permissions
       run: chmod +x ./node_modules/.bin/mocha
 
+    - name: Wait for MySQL
+      run: |
+        until mysqladmin ping -h 127.0.0.1 --silent; do
+          echo 'Waiting for MySQL...'
+          sleep 5
+        done
 
     - name: Run tests
       run: npm test
+      env:
+        NODE_ENV: test
+        DB_HOST: 127.0.0.1
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: booklibrary_test
 
     - name: Deploy to production
       if: success()  # Deploy only on successful tests
       run: |
         npm run build  # Add this if you have a build step
         npm run deploy  # Replace with your deployment command/script
+     
       env:
         NODE_ENV: production
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_NAME: booklibrary  # Production database name
-
-    - name: Deploy to staging (optional)
-      if: success()  # Deploy only on successful tests
-      run: |
-        npm run build  # Add this if you have a build step
-        npm run deploy-staging  # Replace with your staging deployment command/script
-      env:
-        NODE_ENV: staging
-        DB_HOST: ${{ secrets.DB_HOST }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_NAME: booklibrary_test  # Staging/test database name
-
-    - name: Clean up
-      run: npm prune --production
+        DB_NAME: booklibrary # Production database name
