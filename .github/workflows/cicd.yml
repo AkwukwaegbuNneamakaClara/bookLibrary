@@ -1,30 +1,17 @@
-name: CI/CD Pipeline
+name: Node.js CI
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # Adjust branch name as per your main branch
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: booklibrary_test
+    strategy:
+      matrix:
+        node-version: [18.15.0]  # Choose your Node.js version here
 
     steps:
     - name: Checkout code
@@ -33,27 +20,37 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '18'
+        node-version: ${{ matrix.node-version }}
 
     - name: Install dependencies
       run: npm install
-       
-    - name: Ensure mocha permissions
-      run: chmod +x ./node_modules/.bin/mocha
-
-    - name: Wait for MySQL to be ready
-      run: |
-        until mysqladmin ping -h localhost --silent; do
-          echo "Waiting for database connection..."
-          sleep 5
-        done
 
     - name: Run tests
-      env:
-        DB_HOST: localhost
-        DB_PORT: 3306
-        DB_USER: root
-        DB_PASSWORD: root
-        DB_NAME: booklibrary_test
       run: npm test
-    
+
+    - name: Deploy to production
+      if: success()  # Deploy only on successful tests
+      run: |
+        npm run build  # Add this if you have a build step
+        npm run deploy  # Replace with your deployment command/script
+      env:
+        NODE_ENV: production
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_NAME: booklibrary  # Production database name
+
+    - name: Deploy to staging (optional)
+      if: success()  # Deploy only on successful tests
+      run: |
+        npm run build  # Add this if you have a build step
+        npm run deploy-staging  # Replace with your staging deployment command/script
+      env:
+        NODE_ENV: staging
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_NAME: booklibrary_test  # Staging/test database name
+
+    - name: Clean up
+      run: npm prune --production
