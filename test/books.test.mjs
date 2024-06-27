@@ -38,7 +38,7 @@ beforeEach(async () => {
 after(async () => {
     await db.query('DROP TABLE IF EXISTS books');
     await db.end();
-    server.close(); // Close the server after tests
+    //server.close(); // Close the server after tests
 });
 
 describe('Books API', () => {
