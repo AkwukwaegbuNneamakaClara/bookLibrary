@@ -7,7 +7,7 @@ const app = express();
 app.use(bodyParser.json());
 
 const db = await mysql.createConnection({
-    host: process.env.DB_HOST || '127.0.0.1',
+    host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || '3306',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'root',
@@ -96,4 +96,4 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-export default app;
+export default { app, server };

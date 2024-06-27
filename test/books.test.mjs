@@ -7,7 +7,7 @@ let db;
 
 before(async () => {
     db = await mysql.createConnection({
-        host: process.env.DB_HOST || '127.0.0.1',
+        host: process.env.DB_HOST || 'localhost',
         port: process.env.DB_PORT || '3306',
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || 'root',
@@ -38,6 +38,7 @@ beforeEach(async () => {
 after(async () => {
     await db.query('DROP TABLE IF EXISTS books');
     await db.end();
+    server.close(); // Close the server after tests
 });
 
 describe('Books API', () => {

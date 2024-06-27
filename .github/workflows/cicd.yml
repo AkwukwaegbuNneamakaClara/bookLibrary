@@ -42,20 +42,12 @@ jobs:
     - name: Ensure mocha permissions
       run: chmod +x ./node_modules/.bin/mocha
 
-    - name: Wait for MySQL to be ready
+    - name: Wait for MySQL
       run: |
-        for i in seq 1 30; do
-          if mysqladmin ping -h 127.0.0.1 --silent; then
-            echo "MySQL is up and running"
-            break
-          fi
-          echo "Waiting for MySQL to be ready... ($i/30)"
-          sleep 10
+        until mysqladmin ping -h 127.0.0.1 --silent; do
+          echo 'Waiting for MySQL...'
+          sleep 5
         done
-
-    - name: Debugging - MySQL service logs
-      if: failure()
-      run: docker logs $(docker ps -q --filter ancestor=mysql:5.7)
 
     - name: Run tests
       run: npm test
