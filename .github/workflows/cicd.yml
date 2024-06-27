@@ -57,3 +57,9 @@ jobs:
         DB_NAME: booklibrary_test
         NODE_ENV: test
       run: npm test
+    - name: Stop MySQL service
+      run: sudo service mysql stop
+
+    - name: Stop Node.js server
+      run: |
+        lsof -i :3333 -t | xargs kill -9
