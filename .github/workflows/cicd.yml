@@ -15,6 +15,13 @@ jobs:
         image: mysql:5.7
         ports:
           - 3306:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: booklibrary_test
@@ -34,6 +41,15 @@ jobs:
     - name: Ensure mocha permissions
       run: chmod +x ./node_modules/.bin/mocha
 
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {1..10}; do
+          if mysqladmin ping -h 127.0.0.1 -uroot -proot; then
+            break
+          fi
+          sleep 5
+        done
+
     - name: Run tests
       env:
         DB_HOST: 127.0.0.1
@@ -43,6 +59,7 @@ jobs:
       run: |
         # Start the Node.js server in the background
         node index.js &
+        SERVER_PID=$!
 
         # Wait for the server to start
         sleep 5
@@ -51,7 +68,7 @@ jobs:
         npx mocha "test/**/*.mjs"
 
         # Stop the Node.js server
-        fuser -k 3333/tcp
+        kill $SERVER_PID
 
     - name: Stop MySQL service
       run: sudo service mysql stop
