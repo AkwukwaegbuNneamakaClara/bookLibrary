@@ -47,6 +47,12 @@ jobs:
           sleep 5
         done
 
+    - name: Start Node.js server in the background
+      run: |
+        node index.js &
+        echo $! > server.pid
+
+
     - name: Run tests
       env:
         DB_HOST: 127.0.0.1
@@ -54,21 +60,17 @@ jobs:
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
       run: |
-        # Start the Node.js server in the background
-        node index.js &
-        SERVER_PID=$!
-
-        # Wait for the server to start
-        sleep 5
-
+       
         # Ensure mocha is executable
         chmod +x ./node_modules/.bin/mocha
 
         # Run the tests
         npx mocha "test/**/*.mjs"
 
-        # Stop the Node.js server
-        kill $SERVER_PID
+    - name: Stop Node.js server
+      run: |
+        kill $(cat server.pid)
+        rm server.pid
 
     - name: Stop MySQL service
       run: sudo service mysql stop
