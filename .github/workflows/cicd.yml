@@ -45,33 +45,31 @@ jobs:
     - name: Ensure mocha permissions
       run: chmod +x ./node_modules/.bin/mocha
 
-    - name: Set up environment variables
+    - name: Create test database
       run: |
-        echo "DB_HOST=127.0.0.1" >> .env
-        echo "DB_PORT=3306" >> .env
-        echo "DB_USER=root" >> .env
-        echo "DB_PASSWORD=root" >> .env
-        echo "DB_NAME=booklibrary_test" >> .env
-
-    - name: Run database migrations and seed (if necessary)
-      run: |
-        npx sequelize-cli db:migrate
-        npx sequelize-cli db:seed:all  # Adjust this based on your ORM or database setup
-
-    - name: Start MySQL service
-      run: sudo service mysql start
-
+        sudo apt-get install -y mysql-client
+        mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
+    
     - name: Start Node.js server
       run: |
-        npm start &
-        sleep 5  # Wait for server to start
-
+        node index.js &
+        
+      env:
+        DB_HOST: 127.0.0.1
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: booklibrary_test
+        PORT: 3333
+        NODE_ENV: test
+    
     - name: Run tests
-      run: npm test
+      run: |
+        npx mocha "test/**/*.mjs"
 
     - name: Stop Node.js server
       run: |
-        lsof -i :3333 -t | xargs kill -9 || true  # Ignore errors if server is not running
-
+          lsof -i :3333 -t | xargs kill -9
+    
     - name: Stop MySQL service
       run: sudo service mysql stop
+  
