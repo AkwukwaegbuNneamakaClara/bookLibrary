@@ -49,17 +49,14 @@ jobs:
         sudo apt-get install -y mysql-client
         mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
 
-    - name: Run tests
+    - name: Run tests and cleanup
       env:
         DB_HOST: 127.0.0.1
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
         NODE_ENV: test
-      run: npm test
-    - name: Stop MySQL service
-      run: sudo service mysql stop
-
-    - name: Stop Node.js server
-      run: |
+      run: 
+        npm test
+        sudo service mysql stop
         lsof -i :3333 -t | xargs kill -9
