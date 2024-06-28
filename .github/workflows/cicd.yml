@@ -47,6 +47,12 @@ jobs:
           sleep 5
         done
 
+    - name: Ensure port 3333 is free
+      run: |
+        if lsof -i :3333; then
+          lsof -i :3333 | awk 'NR!=1 {print $2}' | xargs kill -9
+        fi
+
     - name: Start Node.js server in the background
       run: |
         nohup node index.js &
