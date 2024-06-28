@@ -61,6 +61,9 @@ jobs:
         # Wait for the server to start
         sleep 5
 
+        # Ensure mocha is executable
+        chmod +x ./node_modules/.bin/mocha
+
         # Run the tests
         npx mocha "test/**/*.mjs"
 
