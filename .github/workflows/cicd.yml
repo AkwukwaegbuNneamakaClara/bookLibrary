@@ -2,8 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main  # Adjust branch name as per your main branch
+    branches: [main] # Adjust branch name as per your main branch
   pull_request:
     branches: [main]
 
@@ -53,16 +52,18 @@ jobs:
     
     - name: Start Node.js server
       run: npm start &
-
-    - name: Run tests
+        
       env:
         DB_HOST: 127.0.0.1
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
+        PORT: 3333
         NODE_ENV: test
-      run: 
-        npm test
+    
+    - name: Run tests
+      run: |
+        npx mocha "test/**/*.mjs"
 
     - name: Stop Node.js server
       run: |
