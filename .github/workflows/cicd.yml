@@ -49,7 +49,7 @@ jobs:
 
     - name: Start Node.js server in the background
       run: |
-        node index.js &
+        nohup node index.js &
         echo $! > server.pid
 
 
@@ -68,9 +68,13 @@ jobs:
         npx mocha "test/**/*.mjs"
 
     - name: Stop Node.js server
+      if: always()
       run: |
-        kill $(cat server.pid)
-        rm server.pid
+        if [ -f server.pid ]; then
+          kill $(cat server.pid)
+          rm server.pid
+        fi
 
     - name: Stop MySQL service
+      if: always()
       run: sudo service mysql stop
