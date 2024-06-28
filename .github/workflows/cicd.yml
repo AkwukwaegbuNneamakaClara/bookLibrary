@@ -37,9 +37,6 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-      
-    - name: Ensure mocha permissions
-      run: chmod +x ./node_modules/.bin/mocha
 
     - name: Wait for MySQL to be ready
       run: |
