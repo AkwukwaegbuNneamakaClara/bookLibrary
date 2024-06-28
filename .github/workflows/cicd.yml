@@ -18,11 +18,13 @@ jobs:
     services:
       mysql:
         image: mysql:5.7
+
+        ports:
+          - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: booklibrary_test
-        ports:
-          - 3306:3306
+       
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -48,6 +50,9 @@ jobs:
       run: |
         sudo apt-get install -y mysql-client
         mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
+    
+    - name: Start Node.js server
+      run: npm start &
 
     - name: Run tests
       env:
@@ -59,9 +64,10 @@ jobs:
       run: 
         npm test
 
-    - name: Stop MySQL service
-      run: sudo service mysql stop
-  
     - name: Stop Node.js server
       run: |
           lsof -i :3333 -t | xargs kill -9
+    
+    - name: Stop MySQL service
+      run: sudo service mysql stop
+  
