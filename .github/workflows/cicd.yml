@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main] # Adjust branch name as per your main branch
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -10,25 +10,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.15.0]  # Choose your Node.js version here
-      
     services:
       mysql:
         image: mysql:5.7
-
         ports:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: booklibrary_test
-       
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
 
     steps:
     - name: Checkout code
@@ -37,39 +26,29 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
 
-    - name: Ensure mocha permissions
-      run: chmod +x ./node_modules/.bin/mocha
-
-    - name: Create test database
-      run: |
-        sudo apt-get install -y mysql-client
-        mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
-    
-    - name: Start Node.js server
-      run: |
-        node index.js &
-        
+    - name: Run tests
       env:
         DB_HOST: 127.0.0.1
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-        PORT: 3333
-        NODE_ENV: test
-    
-    - name: Run tests
       run: |
+        # Start the Node.js server in the background
+        node index.js &
+
+        # Wait for the server to start
+        sleep 5
+
+        # Run the tests
         npx mocha "test/**/*.mjs"
 
-    - name: Stop Node.js server
-      run: |
-          lsof -i :3333 -t | xargs kill -9
-    
+        # Stop the Node.js server
+        fuser -k 3333/tcp
+
     - name: Stop MySQL service
       run: sudo service mysql stop
-  
