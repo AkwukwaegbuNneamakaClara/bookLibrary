@@ -38,6 +38,9 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Fix permissions for Mocha
+      run: chmod +x ./node_modules/.bin/mocha
+
     - name: Wait for MySQL to be ready
       run: |
         for i in {1..10}; do
@@ -63,10 +66,7 @@ jobs:
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-      run: |
-       
-        # Ensure mocha is executable
-        chmod +x ./node_modules/.bin/mocha
+      run: npm test
 
     - name: Stop Node.js server
       if: always()
