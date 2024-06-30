@@ -31,28 +31,27 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Ensure mocha permissions
+      run: chmod +x ./node_modules/.bin/mocha
+
     - name: Create test database
       run: |
         sudo apt-get install -y mysql-client
         mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
 
-    - name: Start Node.js server
-      run: npm start &
+    - name: Run tests
       env:
         DB_HOST: 127.0.0.1
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-        PORT: 3333
         NODE_ENV: test
-
-    - name: Run tests
       run: |
-        npx mocha "test/**/*.mjs"
-
-    - name: Stop Node.js server
-      run: |
-        lsof -i :3333 -t | xargs kill -9 || true
+        npm test
 
     - name: Stop MySQL service
       run: sudo service mysql stop
+
+    - name: Stop Node.js server
+      run: |
+        lsof -i :3333 -t | xargs kill -9
