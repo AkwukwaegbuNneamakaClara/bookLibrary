@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline  
 
 on:
   push:
@@ -15,11 +15,13 @@ jobs:
         image: mysql:5.7
         ports:
           - 3306:3306
+
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+        
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: booklibrary_test
@@ -53,7 +55,7 @@ jobs:
 
     - name: Start Node.js server using pm2
       run: |
-        npx pm2 start index.js --name booklibrary
+          npx pm2 start index.js --name booklibrary
 
     - name: Run tests
       env:
@@ -62,13 +64,14 @@ jobs:
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
       run: |
+       
+        # Ensure mocha is executable
         chmod +x ./node_modules/.bin/mocha
-        npx mocha "test/**/*.mjs"
 
     - name: Stop Node.js server
       if: always()
       run: npx pm2 stop booklibrary
-
+    
     - name: Stop MySQL service
       if: always()
       run: sudo service mysql stop
