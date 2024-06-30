@@ -15,6 +15,11 @@ jobs:
         image: mysql:5.7
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: booklibrary_test
@@ -31,13 +36,24 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Ensure mocha permissions
-      run: chmod +x ./node_modules/.bin/mocha
-
-    - name: Create test database
+    - name: Wait for MySQL to be ready
       run: |
-        sudo apt-get install -y mysql-client
-        mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
+        for i in {1..10}; do
+          if mysqladmin ping -h 127.0.0.1 -uroot -proot; then
+            break
+          fi
+          sleep 5
+        done
+
+    - name: Ensure port 3333 is free
+      run: |
+        if lsof -i :3333; then
+          lsof -i :3333 | awk 'NR!=1 {print $2}' | xargs kill -9
+        fi
+
+    - name: Start Node.js server using pm2
+      run: |
+        npx pm2 start index.js --name booklibrary
 
     - name: Run tests
       env:
@@ -45,13 +61,14 @@ jobs:
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-        NODE_ENV: test
       run: |
-        npm test
-
-    - name: Stop MySQL service
-      run: sudo service mysql stop
+        chmod +x ./node_modules/.bin/mocha
+        npx mocha "test/**/*.mjs"
 
     - name: Stop Node.js server
-      run: |
-        lsof -i :3333 -t | xargs kill -9
+      if: always()
+      run: npx pm2 stop booklibrary
+
+    - name: Stop MySQL service
+      if: always()
+      run: sudo service mysql stop
