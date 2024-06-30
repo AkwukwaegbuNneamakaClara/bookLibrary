@@ -38,9 +38,6 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Fix permissions for Mocha
-      run: chmod +x ./node_modules/.bin/mocha
-
     - name: Wait for MySQL to be ready
       run: |
         for i in {1..10}; do
@@ -56,21 +53,15 @@ jobs:
           lsof -i :3333 | awk 'NR!=1 {print $2}' | xargs kill -9
         fi
 
-    - name: Start Node.js server using pm2
-      run: |
-          npx pm2 start index.js --name booklibrary
-
     - name: Run tests
       env:
         DB_HOST: 127.0.0.1
         DB_USER: root
         DB_PASSWORD: root
         DB_NAME: booklibrary_test
-      run: npm test
-
-    - name: Stop Node.js server
-      if: always()
-      run: npx pm2 stop booklibrary
+      run: |
+       chmod +x ./node_modules/.bin/mocha
+        npx mocha "test/**/*.mjs"
     
     - name: Stop MySQL service
       if: always()
