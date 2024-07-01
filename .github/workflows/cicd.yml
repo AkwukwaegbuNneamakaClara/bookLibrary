@@ -1,4 +1,4 @@
-name: CI/CD Pipeline  
+name: CI/CD pipeline
 
 on:
   push:
@@ -40,12 +40,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14' # Ensure Node.js 14 or higher is used
+          node-version: '14'
 
       - name: Install dependencies
         run: npm install
 
       - name: Run tests
-        run: |
-          npm install --global mocha
-          npx mocha --loader ts-node/esm "test/**/*.mjs"
+        run: npx mocha "test/**/*.mjs"
