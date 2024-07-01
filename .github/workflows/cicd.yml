@@ -1,10 +1,10 @@
-name: CI/CD Pipeline  
+name: Node.js CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
@@ -12,66 +12,38 @@ jobs:
 
     services:
       mysql:
-        image: mysql:5.7
-        ports:
-          - 3306:3306
-
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        
+        image: mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: booklibrary_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+          
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: booklibrary
+      TEST_DB_NAME: booklibrary_test
+      NODE_ENV: test
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Wait for MySQL to be ready
-      run: |
-        for i in {1..10}; do
-          if mysqladmin ping -h 127.0.0.1 -uroot -proot; then
-            break
-          fi
-          sleep 5
-        done
-
-    - name: Ensure port 3333 is free
-      run: |
-        if lsof -i :3333; then
-          lsof -i :3333 | awk 'NR!=1 {print $2}' | xargs kill -9
-        fi
-
-    - name: Start Node.js server using pm2
-      run: |
-          npx pm2 start index.js --name booklibrary
-
-    - name: Run tests
-      env:
-        DB_HOST: 127.0.0.1
-        DB_USER: root
-        DB_PASSWORD: root
-        DB_NAME: booklibrary_test
-      run: |
-       
-        # Ensure mocha is executable
-        chmod +x ./node_modules/.bin/mocha
-
-    - name: Stop Node.js server
-      if: always()
-      run: npx pm2 stop booklibrary
-    
-    - name: Stop MySQL service
-      if: always()
-      run: sudo service mysql stop
+      - name: Run tests
+        run: npm test
