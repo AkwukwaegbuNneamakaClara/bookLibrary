@@ -51,9 +51,15 @@ before(async function() {
 
 after(async function() {
   try {
-    await db.execute('DROP TABLE IF EXISTS books');
-    await db.end();
-    console.log('Cleaned up test database.');
+    if (db) {
+     await db.execute('DROP TABLE IF EXISTS books');
+     await db.end();
+     console.log('Cleaned up test database.');
+    } 
+    if (server) {
+     server.close();
+     console.log('Closed server.');
+    }
   } catch (error) {
     console.error('Error during cleanup:', error);
   }
