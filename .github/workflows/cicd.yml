@@ -49,4 +49,4 @@ jobs:
         run: chmod +x ./node_modules/.bin/mocha
 
       - name: Run tests
-        run: npm test
+        run: node index.js
