@@ -6,23 +6,29 @@ import bodyParser from 'body-parser';
 const app = express();
 app.use(bodyParser.json());
 
-const db = await mysql.createConnection({
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: process.env.DB_PORT || '3306',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'root',
-    //database: process.env.DB_NAME || 'booklibrary_test'
-    database: process.env.NODE_ENV === 'test' ? 'booklibrary_test' : 'booklibrary'
-});
+let db;
 
-try {
-    await db.connect();
-    console.log('Connected to the MySQL database.');
-} catch (err) {
-    console.error('Error connecting to the database:', err);
-    process.exit(1);
-}
+const initializeDbConnection = async () => {
+    db = await mysql.createConnection({
+        host: process.env.DB_HOST || '127.0.0.1',
+        port: process.env.DB_PORT || '3306',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || 'root',
+        database: process.env.NODE_ENV === 'test' ? process.env.TEST_DB_NAME : process.env.DB_NAME
+    });
 
+    try {
+        console.log('Connected to the MySQL database.');
+    } catch (err) {
+        console.error('Error connecting to the database:', err);
+        process.exit(1);
+    }
+};
+
+// Initialize DB connection
+initializeDbConnection();
+
+// Define your routes here
 app.post('/books', async (req, res) => {
     const { title, author, published_date, isbn } = req.body;
     const query = 'INSERT INTO books (title, author, published_date, isbn) VALUES (?, ?, ?, ?)';
@@ -92,9 +98,8 @@ app.delete('/books/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3333;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-//export default { app, server };
-export default app;
+export { app, server };

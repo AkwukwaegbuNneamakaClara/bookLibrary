@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import mysql from 'mysql2/promise';
-import app from '../index.js';
+import { app, server } from '../index.js';
 
 let db;
 
@@ -11,7 +11,7 @@ before(async () => {
         port: process.env.DB_PORT || '3306',
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || 'root',
-        database: process.env.DB_NAME || 'booklibrary_test'
+        database: process.env.TEST_DB_NAME || 'booklibrary_test'
     });
 
     await db.query(`
@@ -25,20 +25,22 @@ before(async () => {
     `);
 });
 
-/*
 beforeEach(async () => {
     await db.query('DELETE FROM books');
     await db.query(`
         INSERT INTO books (title, author, published_date, isbn)
         VALUES ('Test Book', 'Test Author', '2023-01-01', '1234567890');
     `);
+    // Fetch the ID of the inserted book
+    const [rows] = await db.query('SELECT id FROM books WHERE title = ?', ['Test Book']);
+    const insertedBookId = rows[0].id;
 });
-*/
 
 after(async () => {
     await db.query('DROP TABLE IF EXISTS books');
     await db.end();
-    //server.close(); // Close the server after tests
+    await db.end(); // Close DB connection
+    server.close(); // Close server after tests
 });
 
 describe('Books API', () => {
@@ -53,7 +55,6 @@ describe('Books API', () => {
             });
     });
 
-    /*
     it('should GET a book by ID', done => {
         request(app)
             .get('/books/1')
@@ -64,7 +65,6 @@ describe('Books API', () => {
                 done();
             });
     });
-    */
 
     it('should POST a new book', done => {
         request(app)
@@ -78,7 +78,6 @@ describe('Books API', () => {
             });
     });
 
-    /*
     it('should UPDATE a book', done => {
         request(app)
             .put('/books/1')
@@ -90,9 +89,7 @@ describe('Books API', () => {
                 done();
             });
     });
-    */
 
-    /*
     it('should DELETE a book', done => {
         request(app)
             .delete('/books/1')
@@ -103,6 +100,4 @@ describe('Books API', () => {
                 done();
             });
     });
-    */
 });
-    
