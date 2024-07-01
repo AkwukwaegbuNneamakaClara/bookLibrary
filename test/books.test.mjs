@@ -57,11 +57,16 @@ after(async function() {
      console.log('Cleaned up test database.');
     } 
     if (server) {
-     server.close();
-     console.log('Closed server.');
-    }
+        server.close(() => {
+          console.log('Closed server.');
+          process.exit(0); // Force exit after server is closed
+        });
+      } else {
+        process.exit(0); // Force exit if server is not running
+      }
   } catch (error) {
     console.error('Error during cleanup:', error);
+    process.exit(1); // Exit with error code if cleanup fails
   }
 });
 
