@@ -1,41 +1,77 @@
-name: Node.js CI/CD
+name: CI/CD Pipeline  
 
 on:
   push:
-    branches:
-      - main  # Trigger on push to main branch
+    branches: [main]
   pull_request:
-    branches:
-      - main  # Trigger on pull requests to main branch
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [14.x]  # Define Node.js version(s) to test against
+
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: booklibrary_test
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      
+
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
 
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {1..10}; do
+          if mysqladmin ping -h 127.0.0.1 -uroot -proot; then
+            break
+          fi
+          sleep 5
+        done
+
+    - name: Ensure port 3333 is free
+      run: |
+        if lsof -i :3333; then
+          lsof -i :3333 | awk 'NR!=1 {print $2}' | xargs kill -9
+        fi
+
+    - name: Start Node.js server using pm2
+      run: |
+          npx pm2 start index.js --name booklibrary
+
     - name: Run tests
       env:
         DB_HOST: 127.0.0.1
-        DB_PORT: 3306
         DB_USER: root
         DB_PASSWORD: root
-        DB_NAME: booklibrary
-        TEST_DB_NAME: booklibrary_test
-        PORT: 3333
-        NODE_ENV: test
-      run: npm test
+        DB_NAME: booklibrary_test
+      run: |
+       
+        # Ensure mocha is executable
+        chmod +x ./node_modules/.bin/mocha
+
+    - name: Stop Node.js server
+      if: always()
+      run: npx pm2 stop booklibrary
+    
+    - name: Stop MySQL service
+      if: always()
+      run: sudo service mysql stop
