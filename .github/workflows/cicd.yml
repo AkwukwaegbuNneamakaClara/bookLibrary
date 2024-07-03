@@ -50,3 +50,31 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Build application
+        run: npm run build
+        env:
+          BUILD_DIR: ./build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PATH: ${{ secrets.SSH_PATH }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+          rsync -avz --delete ./build/ $SSH_USERNAME@$SSH_HOST:$SSH_PATH
+          ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "
+            cd $SSH_PATH
+            npm install --production
+            pm2 restart all
+          "
