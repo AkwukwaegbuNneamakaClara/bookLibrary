@@ -78,7 +78,15 @@ jobs:
           ssh-add key.pem
           rm key.pem
 
+      - name: Test SSH connection
+        env:
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo Connection successful"
+
       - name: Deploy to Server
+        if: success()
         env:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
