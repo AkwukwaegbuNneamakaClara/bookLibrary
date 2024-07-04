@@ -67,14 +67,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Set up SSH agent
+      - name: Set up SSH agent and debug
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > key.pem
+          cat key.pem
+          ssh-add key.pem
+          rm key.pem
 
       - name: Deploy to Server
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
