@@ -73,6 +73,7 @@ jobs:
         run: |
           eval $(ssh-agent -s)
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > key.pem
+          chmod 600 key.pem
           cat key.pem
           ssh-add key.pem
           rm key.pem
