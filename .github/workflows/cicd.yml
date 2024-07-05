@@ -69,8 +69,14 @@ jobs:
 
       - name: Test network connectivity
         run: |
+          echo "Testing network connectivity"
           ping -c 4 ${{ secrets.SSH_HOST }}
           nc -zv ${{ secrets.SSH_HOST }} 22
+
+      - name: Test DNS resolution
+        run: |
+          echo "Testing DNS resolution"
+          nslookup ${{ secrets.SSH_HOST }}
 
       - name: Test SSH connection
         env:
