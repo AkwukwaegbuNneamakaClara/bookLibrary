@@ -67,6 +67,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Test network connectivity
+        run: |
+          ping -c 4 ${{ secrets.SSH_HOST }}
+          nc -zv ${{ secrets.SSH_HOST }} 22
+
       - name: Test SSH connection
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
