@@ -64,9 +64,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm install
-
       - name: Test network connectivity
         run: |
           echo "Testing network connectivity"
