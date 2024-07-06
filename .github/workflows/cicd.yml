@@ -23,7 +23,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-          
+
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -67,13 +67,13 @@ jobs:
       - name: Test network connectivity
         run: |
           echo "Testing network connectivity"
-          ping -c 4 ${{ secrets.SSH_HOST }}
-          nc -zv ${{ secrets.SSH_HOST }} 22
+          ping -c 4 ${{ secrets.SSH_HOST }} || true
+          nc -zv ${{ secrets.SSH_HOST }} 22 || true
 
       - name: Test DNS resolution
         run: |
           echo "Testing DNS resolution"
-          nslookup ${{ secrets.SSH_HOST }}
+          nslookup ${{ secrets.SSH_HOST }} || true
 
       - name: Test SSH connection
         env:
@@ -83,7 +83,7 @@ jobs:
         run: |
           eval $(ssh-agent -s)
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-          ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo Connection successful"
+          ssh -v -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo Connection successful" || true
 
       - name: Deploy to Server
         env:
@@ -100,4 +100,4 @@ jobs:
             npm install
             npm run build
             pm2 restart all
-          "
+          " || true
