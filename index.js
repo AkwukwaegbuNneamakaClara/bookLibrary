@@ -4,13 +4,16 @@ import mysql from 'mysql2/promise'; // Using promise-based API
 import bodyParser from 'body-parser';
 
 const app = express();
+// Middleware to parse JSON bodies
 app.use(bodyParser.json());
+// Middleware to parse URL-encoded bodies
+app.use(bodyParser.urlencoded({ extended: true }));
 
 let db;
 
 const initializeDbConnection = async () => {
     db = await mysql.createConnection({
-        host: process.env.DB_HOST || '127.0.0.1',
+        host: process.env.DB_HOST || 'db',
         port: process.env.DB_PORT || '3306',
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || 'root',

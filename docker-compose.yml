@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: booklibrary
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    image: clara24/booklibraryproject
+    ports:
+      - "3333:3333"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: booklibrary
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+
+
+
+
+#version: '3.9'
+
+#services:
+  #mysql:
+    #image: mysql:5.7
+    #ports:
+     #- "3306:3306"  # Mapping MySQL port for testing
+     #- "3306:3306"  # Mapping MySQL port for the main app
+    #environment:
+      #MYSQL_ROOT_PASSWORD: root
+      #MYSQL_DATABASE: booklibrary
+      #MYSQL_USER: root
+      #MYSQL_PASSWORD: root
+    #volumes:
+      #- mysql_data:/var/lib/mysql
+      #- ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  #app:
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    #ports:
+      #- "3003:3003"  # Mapping the app port
+    #environment:
+      #DB_HOST: mysql
+      #DB_PORT: 3306
+      #DB_USER: root
+      #DB_PASSWORD: root
+      #DB_NAME: booklibrary_test
+    #volumes:
+      #- .:/index
+    #command: ["./wait-for-it.sh", "mysql:3306", "--", "sh", "-c", "npm install && npm test"]
+#volumes:
+  #mysql_data:
