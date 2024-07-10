@@ -76,6 +76,7 @@ jobs:
           nslookup ${{ secrets.SSH_HOST }} || true
 
       - name: Test SSH connection
+        id: ssh_test
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
@@ -86,6 +87,7 @@ jobs:
           ssh -v -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo Connection successful" || true
 
       - name: Deploy to Server
+        if: steps.ssh_test.outcome == 'success'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
