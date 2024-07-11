@@ -69,3 +69,17 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_REPOSITORY }}:latest
+
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USERNAME }}
+            password: ${{ secrets.SERVER_PASSWORD }}
+            port: ${{ secrets.SERVER_PORT }}
+            script: |
+              docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_REPOSITORY }}:latest
+              docker stop <container_name> || true
+              docker rm <container_name> || true
+              docker run -d --name <container_name> -p 80:80 ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_REPOSITORY }}:latest
+        
