@@ -11,6 +11,10 @@ echo "Building the project"
 npm run build
 
 echo "Restarting application"
-pm2 restart all
+if pm2 list | grep -q booklibrary; then
+  pm2 restart booklibrary
+else
+  pm2 start index.js --name booklibrary
+fi
 
 echo "Deployment successful"
