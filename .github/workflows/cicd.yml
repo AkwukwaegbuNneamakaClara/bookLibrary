@@ -32,9 +32,6 @@ jobs:
       DB_NAME: booklibrary
       TEST_DB_NAME: booklibrary_test
       NODE_ENV: test
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DOCKER_REPOSITORY: booklibraryproject
 
     steps:
       - name: Checkout code
@@ -66,49 +63,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Test network connectivity
-        run: |
-          echo "Testing network connectivity"
-          ping -c 4 ${{ secrets.SSH_HOST }} || true
-          nc -zv ${{ secrets.SSH_HOST }} 22 || true
-
-      - name: Test DNS resolution
-        run: |
-          echo "Testing DNS resolution"
-          nslookup ${{ secrets.SSH_HOST }} || true
-
-      - name: Test SSH connection
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-        run: |
-          eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-          ssh -v -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo Connection successful"
-
       - name: Copy deploy script to server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
         run: |
-          eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-          scp -o StrictHostKeyChecking=no ./scripts/deploy.sh $SSH_USERNAME@$SSH_HOST:$REMOTE_PATH
+          cp ./scripts/deploy.sh $HOME/deploy.sh
+          chmod +x $HOME/deploy.sh
 
       - name: Deploy to server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
         run: |
-          eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-          ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "
-            cd $REMOTE_PATH
-            chmod +x deploy.sh
-            ./deploy.sh
-          "
+          $HOME/deploy.sh
