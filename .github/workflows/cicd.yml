@@ -63,9 +63,12 @@ jobs:
         with:
           node-version: '18'
 
+      - name: List contents of project root directory
+        run: ls -la
+
       - name: Copy deploy script to server
         run: |
-          cp ./scripts/deploy.sh $HOME/deploy.sh
+          cp scripts/deploy.sh $HOME/deploy.sh
           chmod +x $HOME/deploy.sh
 
       - name: Deploy to server
