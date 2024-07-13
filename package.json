@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "test": "npx mocha \"test/**/*.mjs\""
+    "test": "npx mocha \"test/**/*.mjs\"",
+    "build": "echo \"No build step necessary\""
   },
   "keywords": [],
   "author": "",
