@@ -24,6 +24,8 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm install
+          # Set execute permissions for mocha
+          chmod +x ./node_modules/.bin/mocha
           npm run build --if-present
           npm run test --if-present
 
