@@ -15,7 +15,7 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: booklibrary
+          MYSQL_DATABASE: booklibrary_test
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -32,7 +32,7 @@ jobs:
         run: until mysqladmin ping -h 127.0.0.1 --silent; do sleep 1; done
 
       - name: Create test database
-        run: mysql -h 127.0.0.1 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS booklibrary;"
+        run: mysql -h 127.0.0.1 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS booklibrary_test;"
 
       - name: npm install, build, and test
         run: |
