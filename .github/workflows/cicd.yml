@@ -7,33 +7,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: booklibrary
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
 
-      - name: Install dependencies
+      - name: Wait for MySQL to be ready
+        run: until mysqladmin ping -h 127.0.0.1 --silent; do sleep 1; done
+
+      - name: Create test database
+        run: mysql -h 127.0.0.1 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS booklibrary;"
+
+      - name: npm install, build, and test
         run: |
           npm install
           # Set execute permissions for mocha
           chmod +x ./node_modules/.bin/mocha
           npm run build --if-present
-
-      - name: Run tests
-        run: npm test
+          npm run test --if-present
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: root
+          DB_PASSWORD: password
+          DB_NAME: booklibrary
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -44,6 +57,14 @@ jobs:
           name: node-app
           path: release.zip
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
+    steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -51,12 +72,12 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
-
-      - name: Deploy to Azure Web App
+      
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'thesis-backend-cl'
-          slot-name: 'production'
+          slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
