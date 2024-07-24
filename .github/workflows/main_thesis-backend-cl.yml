@@ -10,16 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: booklibrary
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - uses: actions/checkout@v4
 
@@ -28,27 +18,21 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Wait for MySQL to be ready
-        run: until mysqladmin ping -h 127.0.0.1 --silent; do sleep 1; done
-
-      - name: Create test database
-        run: mysql -h 127.0.0.1 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS booklibrary;"
-
       - name: npm install, build, and test
         run: |
           npm install
-          # Set execute permissions for mocha
-          chmod +x ./node_modules/.bin/mocha
+          # Set execute permissions for mocha if needed
+          chmod +x ./node_modules/.bin/mocha || true
           npm run build --if-present
+          # Only run tests if absolutely necessary
           npm run test --if-present
         env:
-          DB_HOST=127.0.0.1
-          DB_PORT=3306
-          DB_USER=root
-          DB_PASSWORD=root
-          DB_NAME=booklibrary
-
-          DATABASE_NAME: test_db
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          NODE_ENV: production
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
