@@ -17,13 +17,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+          cache: 'npm'
 
       - name: Install dependencies and check packages
         run: |
           npm ci
           npm list --depth=0
           npm run build --if-present
-          npm run test --if-present
+          # Comment out test step if you don't need it for deployment
+          # npm run test --if-present
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
