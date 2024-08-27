@@ -10,15 +10,6 @@ jobs:
   build:
     runs-on: self-hosted  # Use my self-hosted runner
 
-    env:
-      DB_HOST: 127.0.0.1
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: booklibrary
-      TEST_DB_NAME: booklibrary_test
-      NODE_ENV: test
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -29,7 +20,10 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          rm -rf node_modules
+          rm package-lock.json
+          npm install
 
       - name: Run tests
         run: npm test
@@ -48,7 +42,7 @@ jobs:
           node-version: '18'
 
       - name: List contents of project root directory
-        run: ls -la
+        run: dir
 
       - name: Install pm2 globally
         run: npm install -g pm2
