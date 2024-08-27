@@ -8,7 +8,16 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted  # Use my self-hosted runner
+    runs-on: self-hosted  # Use your self-hosted runner
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: booklibrary
+      TEST_DB_NAME: booklibrary_test
+      NODE_ENV: test
 
     steps:
       - name: Checkout code
@@ -19,17 +28,20 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Clean up node_modules
+        run: Remove-Item -Recurse -Force .\node_modules
+
+      - name: Remove package-lock.json
+        run: Remove-Item -Force .\package-lock.json
+
       - name: Install dependencies
-        run: |
-          rm -rf node_modules
-          rm package-lock.json
-          npm install
+        run: npm install
 
       - name: Run tests
         run: npm test
 
   deploy:
-    runs-on: self-hosted  # Use my self-hosted runner
+    runs-on: self-hosted  # Use your self-hosted runner
     needs: build
 
     steps:
@@ -49,4 +61,4 @@ jobs:
 
       - name: Run deployment script
         run: |
-          ./scripts/deploy.sh
+          .\scripts\deploy.ps1
