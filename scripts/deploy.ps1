@@ -1,21 +1,24 @@
-#!/bin/bash
-set -e
+# PowerShell equivalent of the Bash script
 
-echo "Pulling latest changes"
+# Exit immediately if a command exits with a non-zero status
+$ErrorActionPreference = "Stop"
+
+Write-Host "Pulling latest changes"
 git pull origin main
 
-echo "Installing dependencies"
+Write-Host "Installing dependencies"
 npm install
 
-echo "Building the project"
-
+Write-Host "Building the project"
 npm run build
 
-echo "Restarting application"
-if pm2 list | grep -q booklibrary; then
-  pm2 restart booklibrary
-else
-  pm2 start index.js --name booklibrary
-fi
+Write-Host "Restarting application"
+$pm2List = pm2 list
 
-echo "Deployment successful"
+if ($pm2List -match 'booklibrary') {
+    pm2 restart booklibrary
+} else {
+    pm2 start index.js --name booklibrary
+}
+
+Write-Host "Deployment successful"
