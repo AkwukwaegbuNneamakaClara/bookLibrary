@@ -1,10 +1,8 @@
-# PowerShell equivalent of the Bash script
-
-# Exit immediately if a command exits with a non-zero status
-$ErrorActionPreference = "Stop"
+# Replace this with the absolute path to your Git executable
+$gitPath = "C:\Program Files\Git\bin\git.exe"
 
 Write-Host "Pulling latest changes"
-git pull origin main
+& "$gitPath" pull origin main
 
 Write-Host "Installing dependencies"
 npm install
