@@ -7,7 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  # Low workload: fewer tests or smaller tasks
+  build-low:
     runs-on: self-hosted  # Use your self-hosted runner
 
     env:
@@ -31,18 +32,77 @@ jobs:
       - name: Clean up node_modules
         run: Remove-Item -Recurse -Force .\node_modules
 
-      - name: Remove package-lock.json
-        run: Remove-Item -Force .\package-lock.json
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run low workload tests
+        run: npm test -- --grep "smallTest"  # Simulate low workload by running a subset of tests
+
+  # Medium workload: moderate number of tests or tasks
+  build-medium:
+    runs-on: self-hosted  # Use your self-hosted runner
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: booklibrary
+      TEST_DB_NAME: booklibrary_test
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Clean up node_modules
+        run: Remove-Item -Recurse -Force .\node_modules
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      - name: Run medium workload tests
+        run: npm test -- --grep "mediumTest"  # Simulate medium workload by running more tests
+
+  # High workload: full test suite or larger tasks
+  build-high:
+    runs-on: self-hosted  # Use your self-hosted runner
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: booklibrary
+      TEST_DB_NAME: booklibrary_test
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Clean up node_modules
+        run: Remove-Item -Recurse -Force .\node_modules
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run high workload tests
+        run: npm test  # Simulate high workload by running the entire test suite
 
   deploy:
     runs-on: self-hosted  # Use your self-hosted runner
-    needs: build
+    needs: [build-low, build-medium, build-high]  # Ensure all workload levels are built
 
     steps:
       - name: Checkout code
