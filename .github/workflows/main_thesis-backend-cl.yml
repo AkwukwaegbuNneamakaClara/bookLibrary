@@ -31,7 +31,7 @@ jobs:
           NODE_ENV: test
 
       - name: Run low workload tests
-        run: npm test -- --grep "smallTest" --verbose
+        run: npm test -- --grep "small workload" --verbose
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
@@ -42,7 +42,7 @@ jobs:
           NODE_ENV: test
 
       - name: Run medium workload tests
-        run: npm test -- --grep "mediumTest" --verbose
+        run: npm test -- --grep "medium workload" --verbose
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
@@ -53,7 +53,7 @@ jobs:
           NODE_ENV: test
 
       - name: Run high workload tests
-        run: npm test -- --grep "highTest" --verbose
+        run: npm test -- --grep "high workload" --verbose
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
