@@ -38,6 +38,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          PORT: 8080
           NODE_ENV: test
 
       - name: Run medium workload tests
@@ -48,6 +49,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          PORT: 8080
           NODE_ENV: test
 
       - name: Run high workload tests
@@ -58,6 +60,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          PORT: 8080
           NODE_ENV: test
 
       - name: Zip artifact for deployment
