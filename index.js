@@ -18,9 +18,9 @@ const initializeDbConnection = async () => {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.NODE_ENV === 'test' ? process.env.TEST_DB_NAME : process.env.DB_NAME,
-        /*ssl: {
+       ssl: {
             rejectUnauthorized: true // This option ensures that the SSL certificate is verified
-          }*/
+          }
     });
 
     try {
@@ -103,7 +103,7 @@ app.delete('/books/:id', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
