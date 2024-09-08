@@ -14,7 +14,10 @@ before(async function() {
       port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: process.env.TEST_DB_NAME
+      database: process.env.DB_NAME,
+      ssl: {
+        rejectUnauthorized: true // This option ensures that the SSL certificate is verified
+      }
     });
 
     console.log('Connected to test database.');
