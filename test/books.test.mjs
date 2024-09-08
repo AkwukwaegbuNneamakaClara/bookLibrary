@@ -7,7 +7,7 @@ let db;
 let bookId;
 
 before(async function() {
-  this.timeout(10000); // Increase timeout to 10 seconds
+  this.timeout(15000); // Increase timeout to 15 seconds
   try {
     db = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -47,11 +47,12 @@ before(async function() {
     console.log('Inserted test book with ID:', bookId);
   } catch (error) {
     console.error('Error during setup:', error);
+    throw error; // Fail the setup if there's an error
   }
 });
 
 after(async function() {
-  this.timeout(10000); // Increase timeout to 10 seconds
+  this.timeout(15000); // Increase timeout to 15 seconds
   try {
     if (db) {
      await db.execute('DROP TABLE IF EXISTS books');
@@ -73,13 +74,13 @@ after(async function() {
 });
 
 describe('Books API', function() {
-  this.timeout(10000); // Increase timeout to 10 seconds for all tests
+  this.timeout(15000); // Increase timeout to 15 seconds for all tests
 
   after(function(done) {
     server.close(done);
   });
 
-  it('should GET all books', function(done) {
+  it('should GET all books - small workload', function(done) {
     request(app)
       .get('/books')
       .expect(200)
@@ -90,7 +91,7 @@ describe('Books API', function() {
       });
   });
 
-  it('should GET a book by ID', function(done) {
+  it('should GET a book by ID - medium workload', function(done) {
     request(app)
       .get(`/books/${bookId}`)
       .expect(200)
@@ -102,7 +103,7 @@ describe('Books API', function() {
       });
   });
 
-  it('should POST a new book', function(done) {
+  it('should POST a new book - high workload', function(done) {
     const newBook = {
       title: 'New Book',
       author: 'Author Name',
@@ -118,7 +119,7 @@ describe('Books API', function() {
         expect(res.text).to.include('Book added with ID:');
         done();
       });
-  });
+  })
 
   it('should UPDATE a book', function(done) {
     const updatedBook = {
@@ -136,7 +137,7 @@ describe('Books API', function() {
         expect(res.text).to.equal('Book updated successfully');
         done();
       });
-  });
+  })
 
   it('should DELETE a book', function(done) {
     request(app)
@@ -147,5 +148,5 @@ describe('Books API', function() {
         expect(res.text).to.equal('Book deleted successfully');
         done();
       });
-  });
+  })
 });

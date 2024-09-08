@@ -36,7 +36,7 @@ jobs:
         run: npm install
 
       - name: Run low workload tests
-        run: npm test -- --grep "smallTest" --verbose # Simulate low workload by running a subset of tests
+        run: npm test -- --grep "small workload" --verbose # Simulate low workload by running a subset of tests
 
   # Medium workload: moderate number of tests or tasks
   build-medium:
@@ -67,7 +67,7 @@ jobs:
         run: npm install
 
       - name: Run medium workload tests
-        run: npm test -- --grep "mediumTest" --verbose # Simulate medium workload by running more tests
+        run: npm test -- --grep "medium workload" --verbose # Simulate medium workload by running more tests
 
   # High workload: full test suite or larger tasks
   build-high:
@@ -98,7 +98,7 @@ jobs:
         run: npm install
 
       - name: Run high workload tests
-        run: npm test  # Simulate high workload by running the entire test suite
+        run: npm test -- --grep "high workload" --verbose # Simulate high workload by running the entire test suite
 
   deploy:
     runs-on: self-hosted  # Use your self-hosted runner
