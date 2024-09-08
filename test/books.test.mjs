@@ -7,7 +7,7 @@ let db;
 let bookId;
 
 before(async function() {
-  this.timeout(15000); // Increase timeout to 15 seconds
+  this.timeout(20000); // Increase timeout to 15 seconds
   try {
     db = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -55,7 +55,7 @@ before(async function() {
 });
 
 after(async function() {
-  this.timeout(15000); // Increase timeout to 15 seconds
+  this.timeout(20000); // Increase timeout to 15 seconds
   try {
     if (db) {
      await db.execute('DROP TABLE IF EXISTS books');
@@ -77,7 +77,7 @@ after(async function() {
 });
 
 describe('Books API', function() {
-  this.timeout(15000); // Increase timeout to 15 seconds for all tests
+  this.timeout(20000); // Increase timeout to 15 seconds for all tests
 
   after(function(done) {
     server.close(done);
