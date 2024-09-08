@@ -49,9 +49,12 @@ app.post('/books', async (req, res) => {
 // Read all books
 app.get('/books', async (req, res) => {
     try {
+        console.log('Received request to fetch all books');
         const [results] = await db.execute('SELECT * FROM books');
+        console.log('Books fetched:', results);
         res.status(200).json(results);
     } catch (err) {
+        console.error('Error fetching books:', err);
         res.status(500).send(err);
     }
 });
