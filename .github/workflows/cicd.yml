@@ -9,7 +9,7 @@ on:
 jobs:
   # Low workload: fewer tests or smaller tasks
   build-low:
-    runs-on: self-hosted  # Use your self-hosted runner
+    runs-on: self-hosted  # Use my self-hosted runner
 
     env:
       DB_HOST: 127.0.0.1
@@ -71,7 +71,7 @@ jobs:
 
   # High workload: full test suite or larger tasks
   build-high:
-    runs-on: self-hosted  # Use your self-hosted runner
+    runs-on: self-hosted  # Use my self-hosted runner
 
     env:
       DB_HOST: 127.0.0.1
@@ -100,9 +100,9 @@ jobs:
       - name: Run high workload tests
         run: npm test -- --grep "high workload" --verbose # Simulate high workload by running the entire test suite
 
-  deploy:
-    runs-on: self-hosted  # Use your self-hosted runner
-    needs: [build-low, build-medium, build-high]  # Ensure all workload levels are built
+  deploy-low:
+    runs-on: self-hosted  # Use my self-hosted runner
+    needs: build-low  # Ensure low workload levels are built
 
     steps:
       - name: Checkout code
@@ -119,6 +119,54 @@ jobs:
       - name: Install pm2 globally
         run: npm install -g pm2
 
-      - name: Run deployment script
+      - name: Deploy for low workload
         run: |
           .\scripts\deploy.ps1
+
+  deploy-medium:
+    runs-on: self-hosted  # Use my self-hosted runner
+    needs: build-low  # Ensure meduim workload levels are built
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: List contents of project root directory
+        run: dir
+
+      - name: Install pm2 globally
+        run: npm install -g pm2
+
+      - name: Deploy for medium workload
+        run: |
+          .\scripts\deploy.ps1
+
+  deploy-high:
+    runs-on: self-hosted  # Use my self-hosted runner
+    needs: build-low  # Ensure high workload levels are built
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: List contents of project root directory
+        run: dir
+
+      - name: Install pm2 globally
+        run: npm install -g pm2
+
+      - name: Deploy for high workload
+        run: |
+          .\scripts\deploy.ps1
+
+
