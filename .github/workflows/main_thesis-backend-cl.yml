@@ -97,7 +97,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'thesis-backend-cl-low'
+          app-name: 'thesis-backend-cl'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
@@ -123,7 +123,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'thesis-backend-cl-medium'
+          app-name: 'thesis-backend-cl'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
@@ -149,7 +149,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'thesis-backend-cl-high'
+          app-name: 'thesis-backend-cl'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
