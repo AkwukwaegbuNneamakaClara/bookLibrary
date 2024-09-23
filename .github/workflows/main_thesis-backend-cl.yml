@@ -100,7 +100,7 @@ jobs:
           app-name: 'thesis-backend-cl-low'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_LOW }}
 
   # Deploy for medium workload
   deploy-medium:
@@ -126,7 +126,7 @@ jobs:
           app-name: 'thesis-backend-cl-medium'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_MEDIUM }}
 
   # Deploy for high workload
   deploy-high:
@@ -152,4 +152,4 @@ jobs:
           app-name: 'thesis-backend-cl-high'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4FE820B6A1EA402AA21DE54B7088E41D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_HIGH }}
